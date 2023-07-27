@@ -1,4 +1,34 @@
 Attribute VB_Name = "Lesson_Formatter"
+Sub Find_Convert_UnicodeMath()
+'
+' Find_Convert_UnicodeMath Macro
+' Finds and builds all UnicodeMath equations to MS Word formatted equations
+'
+    Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "```*```"
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchAllWordForms = False
+        .MatchSoundsLike = False
+        .MatchWildcards = True
+    End With
+    Do
+        Found = Selection.Find.Execute
+        If Found Then
+            Selection.Text = Mid(Selection.Text, 4, Len(Selection.Text) - 6)
+            Selection.OMaths.Add Range:=Selection.Range
+            Selection.OMaths.BuildUp
+            Selection.MoveRight
+            Selection.MoveRight
+        End If
+    Loop While Found
+End Sub
+
 Sub Find_Convert_In_Line()
 Attribute Find_Convert_In_Line.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Find_Convert_In_Line"
 '
@@ -21,6 +51,7 @@ Attribute Find_Convert_In_Line.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Fi
     Do
         Found = Selection.Find.Execute
         If Found Then
+            Selection.Text = Mid(Selection.Text, 3, Len(Selection.Text) - 4)
             Selection.OMaths.Add Range:=Selection.Range
             Selection.OMaths.BuildUp
             Selection.MoveRight
@@ -51,6 +82,7 @@ Sub Find_Convert_Block_Eq()
     Do
         Found = Selection.Find.Execute
         If Found Then
+            Selection.Text = Mid(Selection.Text, 3, Len(Selection.Text) - 4)
             Selection.OMaths.Add Range:=Selection.Range
             Selection.OMaths.BuildUp
             Selection.MoveRight
@@ -64,6 +96,8 @@ Attribute Format_Lesson.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Format_Le
 '
 ' Format_Lesson Macro
 ' Formats ChatGPT lessons copied and pasted into MS Word
+'
+' Note that the document should only contain either LaTex or Unicode equations and MS Word must have the input type set accordingly.
 '
     'Format Whole Page to normal style
     Selection.WholeStory
@@ -165,5 +199,6 @@ Attribute Format_Lesson.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Format_Le
     ' Fill In all Latex Equations
     Find_Convert_Block_Eq
     Find_Convert_In_Line
+    Find_Convert_UnicodeMath
     MsgBox "Formatting Completed!"
 End Sub
