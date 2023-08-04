@@ -381,4 +381,25 @@ Private Sub format_markdown()
             Selection.MoveDown
         End If
     Loop While Found
+    
+    ' bold font
+    Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "[*][*]*[*][*]"
+        .Replacement.Text = ""
+        .Forward = True
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchAllWordForms = False
+        .MatchWildcards = True
+    End With
+    Do
+        Found = Selection.Find.Execute
+        If Found Then
+            ' ERASE Markdown Delimitters
+            Selection.Text = Mid(Selection.Text, 3, Len(Selection.Text) - 4)
+            Selection.Font.Bold = True
+            Selection.MoveRight
+        End If
+    Loop While Found
 End Sub
