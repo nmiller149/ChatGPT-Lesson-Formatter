@@ -67,8 +67,8 @@ Attribute Format_Lesson.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Format_Le
     Call format_gpt3_subsections
     
     'Format Each Subsection (GPT4/Markdown)
-    Call format_gpt4_subsections
-    
+    'Call format_gpt4_subsections
+    Call format_markdown
     
     
     ' Format All Equations
@@ -276,4 +276,109 @@ Private Sub format_gpt4_subsections()
         End If
     Loop While Found
 
+End Sub
+
+
+Private Sub format_markdown()
+'
+' format_markdown subroutine
+' formats titles, sections, subsetctions of markdown language to Word format
+'
+'
+
+    ' Titles
+    Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "^p# "
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = True
+        .MatchAllWordForms = False
+        .MatchSoundsLike = False
+        .MatchWildcards = False
+    End With
+    Do
+        Found = Selection.Find.Execute
+        If Found Then
+            ' ERASE Markdown Delimitters
+            Selection.Text = ""
+            Selection.Style = ActiveDocument.Styles("Title")
+            Selection.MoveDown
+        End If
+    Loop While Found
+    
+    ' Sections
+    Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "^p## "
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchAllWordForms = False
+        .MatchSoundsLike = False
+        .MatchWildcards = False
+    End With
+    Do
+        Found = Selection.Find.Execute
+        If Found Then
+            ' ERASE Markdown Delimitters
+            Selection.Text = ""
+            Selection.Style = ActiveDocument.Styles("Heading 1")
+            Selection.MoveDown
+        End If
+    Loop While Found
+        
+    ' subsections
+    Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "^p### "
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchAllWordForms = False
+        .MatchSoundsLike = False
+        .MatchWildcards = False
+    End With
+    Do
+        Found = Selection.Find.Execute
+        If Found Then
+            ' ERASE Markdown Subsection Delimitters
+            Selection.Text = ""
+            Selection.Style = ActiveDocument.Styles("Heading 2")
+            Selection.MoveDown
+            ' ERASE EMPTY LINE AFTER SUBSECTION
+            ' Expand the Selection to the entire line
+            Selection.Expand Unit:=wdLine
+            ' Get the text of the selected line
+            selectedLine = Selection.Text
+            ' Check if the selected line is empty
+                    ' Initialize the flag to track if non-ASCII characters are found
+            hasNonASCII = False
+            ' Loop through each character in the line
+            For i = 1 To Len(selectedLine)
+                ' Get the ASCII code of the character
+                charCode = Asc(Mid(selectedLine, i, 1))
+                
+                ' Check if the character is outside the range of printable ASCII characters
+                If charCode < 32 Or charCode > 126 Then
+                    hasNonASCII = True
+                    Exit For
+                End If
+            Next i
+            ' If non-ASCII characters are found, delete the entire line
+            If hasNonASCII Then
+                Selection.Delete
+            End If
+            Selection.MoveDown
+        End If
+    Loop While Found
 End Sub
