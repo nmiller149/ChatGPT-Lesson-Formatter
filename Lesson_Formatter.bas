@@ -12,7 +12,7 @@ Attribute Format_Lesson.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Format_Le
 '
     'Format Whole Page to normal style
     Selection.WholeStory
-    Selection.Style = ActiveDocument.Styles("Normal")
+    'Selection.Style = ActiveDocument.Styles("Normal")
     Selection.HomeKey Unit:=wdLine
     
     
@@ -66,6 +66,7 @@ Attribute Format_Lesson.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Format_Le
     'Format Each Subsection (GPT3)
     Call format_gpt3_subsections
     
+    
     'Format Each Subsection (GPT4/Markdown)
     'Call format_gpt4_subsections
     Call format_markdown
@@ -85,6 +86,9 @@ Sub Find_Convert_UnicodeMath()
 ' Find_Convert_UnicodeMath Macro
 ' Finds and builds all UnicodeMath equations to MS Word formatted equations
 '
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
+    
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = "```*```"
@@ -116,6 +120,9 @@ Sub Find_Convert_In_Line()
 ' Find_Convert_In_Line Macro
 ' Finds and converts all In-Line LaTeX equations to MS Word formatted equations
 '
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
+    
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = "\\\(*\\\)"
@@ -147,6 +154,9 @@ Sub Find_Convert_Block_Eq()
 ' Find_Convert_Block_Eq Macro
 ' Finds and converts all Block LaTeX equations to MS Word formatted equations
 '
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
+    
     Selection.Find.ClearFormatting
     With Selection.Find
         .Text = "\\\[*\\\]"
@@ -285,7 +295,9 @@ Private Sub format_markdown()
 ' formats titles, sections, subsetctions of markdown language to Word format
 '
 '
-
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
+    
     ' Titles
     Selection.Find.ClearFormatting
     With Selection.Find
@@ -310,6 +322,9 @@ Private Sub format_markdown()
         End If
     Loop While Found
     
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
+    
     ' Sections
     Selection.Find.ClearFormatting
     With Selection.Find
@@ -333,7 +348,10 @@ Private Sub format_markdown()
             Selection.MoveDown
         End If
     Loop While Found
-        
+    
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
+    
     ' subsections
     Selection.Find.ClearFormatting
     With Selection.Find
@@ -381,6 +399,60 @@ Private Sub format_markdown()
             Selection.MoveDown
         End If
     Loop While Found
+    
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
+    
+    ' subsubsections
+    Selection.Find.ClearFormatting
+    With Selection.Find
+        .Text = "^p#### "
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchAllWordForms = False
+        .MatchSoundsLike = False
+        .MatchWildcards = False
+    End With
+    Do
+        Found = Selection.Find.Execute
+        If Found Then
+            ' ERASE Markdown Subsection Delimitters
+            Selection.Text = ""
+            Selection.Style = ActiveDocument.Styles("Heading 3")
+            Selection.MoveDown
+            ' ERASE EMPTY LINE AFTER SUBSECTION
+            ' Expand the Selection to the entire line
+            Selection.Expand Unit:=wdLine
+            ' Get the text of the selected line
+            selectedLine = Selection.Text
+            ' Check if the selected line is empty
+                    ' Initialize the flag to track if non-ASCII characters are found
+            hasNonASCII = False
+            ' Loop through each character in the line
+            For i = 1 To Len(selectedLine)
+                ' Get the ASCII code of the character
+                charCode = Asc(Mid(selectedLine, i, 1))
+                
+                ' Check if the character is outside the range of printable ASCII characters
+                If charCode < 32 Or charCode > 126 Then
+                    hasNonASCII = True
+                    Exit For
+                End If
+            Next i
+            ' If non-ASCII characters are found, delete the entire line
+            If hasNonASCII Then
+                Selection.Delete
+            End If
+            Selection.MoveDown
+        End If
+    Loop While Found
+    
+    ' Move the selection to the top of the page (Page 1)
+    Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
     
     ' bold font
     Selection.Find.ClearFormatting
