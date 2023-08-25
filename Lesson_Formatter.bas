@@ -173,7 +173,8 @@ Sub Find_Convert_Block_Eq()
     Do
         Found = Selection.Find.Execute
         If Found Then
-            Selection.Text = Mid(Selection.Text, 3, Len(Selection.Text) - 4)
+            Selection.Text = clean_matrix_block_equation(Selection.Text)
+            Selection.Text = Mid(Selection.Text, 4, Len(Selection.Text) - 5)
             Selection.OMaths.Add Range:=Selection.Range
             Selection.OMaths.BuildUp
             Selection.MoveRight
@@ -475,3 +476,45 @@ Private Sub format_markdown()
         End If
     Loop While Found
 End Sub
+
+
+Function clean_matrix_block_equation(inputText As String) As String
+    Dim startTag As String
+    Dim endTag As String
+    Dim startIdx As Long
+    Dim endIdx As Long
+    Dim selectedText As String
+    Dim cleanedText As String
+    
+    ' Define the start and end tags
+    startTag = "\begin{align*}" & vbCr
+    endTag = "\end{align*}" & vbCr
+    
+    ' Find the position of the start and end tags
+    startIdx = InStr(inputText, startTag)
+    endIdx = InStr(inputText, endTag)
+    
+    ' Check if both start and end tags are found
+    If startIdx > 0 And endIdx > 0 Then
+        ' Extract the text between start and end tags
+        selectedText = Mid(inputText, startIdx + Len(startTag), endIdx - (startIdx + Len(startTag)))
+        
+        ' Remove "\\\" from the end of each line
+        selectedText = Replace(selectedText, "\\" & vbCr, vbCr)
+        
+        ' Replace "\begin{bmatrix}" with "\left(\begin{matrix}"
+        selectedText = Replace(selectedText, "\begin{bmatrix}", "\left(\begin{matrix}")
+        
+        ' Replace "\end{bmatrix}" with "\end{matrix}\right)"
+        selectedText = Replace(selectedText, "\end{bmatrix}", "\end{matrix}\right)")
+        
+        ' Combine cleaned text with original text
+        cleanedText = Mid(inputText, 1, startIdx - 1) & selectedText & Mid(inputText, endIdx + Len(endTag))
+    Else
+        ' If start and/or end tags are not found, return the original input text
+        cleanedText = inputText
+    End If
+    
+    ' Return the cleaned text
+    clean_matrix_block_equation = cleanedText
+End Function
