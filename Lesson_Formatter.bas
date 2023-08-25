@@ -1,5 +1,5 @@
 Attribute VB_Name = "Lesson_Formatter"
-' TODO: Format Markdown Sections and bullet points. Extra credit for formatting tables.
+' TODO: Format tables.
 
 Sub Format_Lesson()
 Attribute Format_Lesson.VB_Description = "Formats ChatGPT lessons copied and pasted into MS Word"
@@ -76,6 +76,9 @@ Attribute Format_Lesson.VB_ProcData.VB_Invoke_Func = "Normal.NewMacros.Format_Le
     Find_Convert_Block_Eq
     Find_Convert_In_Line
     Find_Convert_UnicodeMath
+    
+    ' Format Bullet Points
+    Call ConvertToBulletPoints
     
     MsgBox "Formatting Completed!"
 End Sub
@@ -518,3 +521,20 @@ Function clean_matrix_block_equation(inputText As String) As String
     ' Return the cleaned text
     clean_matrix_block_equation = cleanedText
 End Function
+
+
+Sub ConvertToBulletPoints()
+    Dim para As Paragraph
+    Dim rng As Range
+    
+    ' Loop through each paragraph in the active document
+    For Each para In ActiveDocument.Paragraphs
+        Set rng = para.Range
+        
+        ' Check if the paragraph starts with "- "
+        If Left(rng.Text, 2) = "- " Then
+            ' Convert the paragraph to a bullet point
+            rng.ListFormat.ApplyBulletDefault
+        End If
+    Next para
+End Sub
