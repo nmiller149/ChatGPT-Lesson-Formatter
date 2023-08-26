@@ -347,7 +347,8 @@ Private Sub format_markdown()
         Found = Selection.Find.Execute
         If Found Then
             ' ERASE Markdown Delimitters
-            Selection.Text = ""
+            Selection.Text = Left(Selection.Text, 1)
+            Selection.MoveRight
             Selection.Style = ActiveDocument.Styles("Heading 1")
             Selection.MoveDown
         End If
@@ -374,7 +375,8 @@ Private Sub format_markdown()
         Found = Selection.Find.Execute
         If Found Then
             ' ERASE Markdown Subsection Delimitters
-            Selection.Text = ""
+            Selection.Text = Left(Selection.Text, 1)
+            Selection.MoveRight
             Selection.Style = ActiveDocument.Styles("Heading 2")
             Selection.MoveDown
             ' ERASE EMPTY LINE AFTER SUBSECTION
@@ -425,7 +427,8 @@ Private Sub format_markdown()
         Found = Selection.Find.Execute
         If Found Then
             ' ERASE Markdown Subsection Delimitters
-            Selection.Text = ""
+            Selection.Text = Left(Selection.Text, 1)
+            Selection.MoveRight
             Selection.Style = ActiveDocument.Styles("Heading 3")
             Selection.MoveDown
             ' ERASE EMPTY LINE AFTER SUBSECTION
