@@ -353,8 +353,7 @@ Private Sub format_markdown()
         Found = Selection.Find.Execute
         If Found Then
             ' ERASE Markdown Delimitters
-            Selection.Text = Left(Selection.Text, 1)
-            Selection.MoveRight
+            Selection.Text = ""
             Selection.Style = ActiveDocument.Styles("Heading 1")
             Selection.MoveDown
             delete_empty_line
@@ -452,25 +451,8 @@ Private Sub format_markdown()
     Selection.GoTo What:=wdGoToPage, Which:=wdGoToAbsolute, Count:=1
     
     ' bold font
-    Selection.Find.ClearFormatting
-    With Selection.Find
-        .Text = "[*][*]*[*][*]"
-        .Replacement.Text = ""
-        .Forward = True
-        .MatchCase = False
-        .MatchWholeWord = False
-        .MatchAllWordForms = False
-        .MatchWildcards = True
-    End With
-    Do
-        Found = Selection.Find.Execute
-        If Found Then
-            ' ERASE Markdown Delimitters
-            Selection.Text = Mid(Selection.Text, 3, Len(Selection.Text) - 4)
-            Selection.Font.Bold = True
-            Selection.MoveRight
-        End If
-    Loop While Found
+    Call BoldMarkdownText
+    Call ItalicMarkdownText
 End Sub
 
 
@@ -686,4 +668,85 @@ Private Sub delete_empty_line()
     Else
         Selection.MoveLeft
     End If
+End Sub
+
+
+Private Sub BoldMarkdownText()
+    Dim lineRange As Range
+    
+    ' Loop through each paragraph in the active document
+    For Each para In ActiveDocument.Paragraphs
+        Set lineRange = para.Range
+        
+        ' Get the start and end positions of the line
+        Dim lineStart As Long
+        Dim lineEnd As Long
+        lineStart = lineRange.Start
+        lineEnd = lineRange.End
+        
+        ' Expand the range to cover the entire line
+        lineRange.SetRange lineStart, lineEnd
+        
+        ' Find and replace markdown notation for bold text
+        Do
+            lineRange.Find.ClearFormatting
+            With lineRange.Find
+                .Text = "\*\*(*)\*\*"
+                .Replacement.Text = "\1"
+                .Forward = True
+                .MatchWildcards = True
+            End With
+            
+            Found = lineRange.Find.Execute
+            If Found Then
+                lineRange.Text = Mid(lineRange.Text, 3, Len(lineRange.Text) - 4)
+                ' Apply bold formatting
+                lineRange.Font.Bold = True
+            End If
+        Loop While Found
+        
+        ' Collapse the range to the end of the line
+        lineRange.Collapse wdCollapseEnd
+    Next para
+End Sub
+
+
+Private Sub ItalicMarkdownText()
+    'Note: Always run BoldMarkdownText first...
+    Dim lineRange As Range
+    
+    ' Loop through each paragraph in the active document
+    For Each para In ActiveDocument.Paragraphs
+        Set lineRange = para.Range
+        
+        ' Get the start and end positions of the line
+        Dim lineStart As Long
+        Dim lineEnd As Long
+        lineStart = lineRange.Start
+        lineEnd = lineRange.End
+        
+        ' Expand the range to cover the entire line
+        lineRange.SetRange lineStart, lineEnd
+        
+        ' Find and replace markdown notation for bold text
+        Do
+            lineRange.Find.ClearFormatting
+            With lineRange.Find
+                .Text = "\*(*)\*"
+                .Replacement.Text = ""
+                .Forward = True
+                .MatchWildcards = True
+            End With
+            
+            Found = lineRange.Find.Execute
+            If Found Then
+                lineRange.Text = Mid(lineRange.Text, 2, Len(lineRange.Text) - 2)
+                ' Apply bold formatting
+                lineRange.Font.Italic = True
+            End If
+        Loop While Found
+        
+        ' Collapse the range to the end of the line
+        lineRange.Collapse wdCollapseEnd
+    Next para
 End Sub
